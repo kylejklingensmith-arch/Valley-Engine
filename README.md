@@ -152,11 +152,12 @@ Requirements:
 - A C++20 compiler.
 - Optional on Linux: X11 development files for the native window backend.
 
-Configure and build:
+Configure and build from a clean checkout:
 
 ```sh
+rm -rf build
 cmake -S . -B build
-cmake --build build
+cmake --build build --parallel
 ```
 
 If X11 is unavailable, the project still builds with the headless backend.
@@ -189,13 +190,13 @@ Command-line options:
 
 ## Test
 
-After building, run the smoke test:
+After building, run the full test suite:
 
 ```sh
 ctest --test-dir build --output-on-failure
 ```
 
-The smoke test starts `ValleyEngine` in headless mode for three frames and verifies that the engine loop exits cleanly. The clock test verifies real-time progression, simulation-time progression, fixed timestep accumulation, pause/resume, debug time scaling, queued debug stepping, and invalid clock configuration handling. The renderer architecture test verifies the engine-level test scene, render graph pass order, raster backend path, and debug overlay statistics. The world streaming test verifies deterministic negative chunk coordinates, async chunk loading/unloading, registry state, debug chunk maps, and floating-origin rebasing. The terrain framework test verifies deterministic layered noise, biome classification, LOD resolution changes, async mesh generation, terrain streaming integration with loaded world chunks, and debug biome maps. The simulation framework test verifies fixed tick ordering, stable deterministic seeds, paused debug stepping, and profiler records.
+The suite includes engine smoke and module framework tests. The smoke test starts `ValleyEngine` in headless mode for three frames and verifies that the engine loop exits cleanly. The clock test verifies real-time progression, simulation-time progression, fixed timestep accumulation, pause/resume, debug time scaling, queued debug stepping, and invalid clock configuration handling. The renderer architecture test verifies the engine-level test scene, render graph pass order, raster backend path, and debug overlay statistics. The world streaming test verifies deterministic negative chunk coordinates, async chunk loading/unloading, registry state, debug chunk maps, and floating-origin rebasing. The terrain framework test verifies deterministic layered noise, biome classification, LOD resolution changes, async mesh generation, terrain streaming integration with loaded world chunks, and debug biome maps. The simulation framework test verifies fixed tick ordering, stable deterministic seeds, paused debug stepping, and profiler records.
 
 ## Next engine-only steps
 
