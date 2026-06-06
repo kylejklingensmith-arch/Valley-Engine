@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Valley/Assets/AssetTypes.h"
+#include "Valley/Assets/AssetManager.h"
 #include "Valley/Renderer/Math.h"
 
 #include <cstddef>
@@ -15,27 +15,11 @@ struct Transform {
     Vec3 scale { 1.0, 1.0, 1.0 };
 };
 
-enum class MeshPrimitive {
-    GroundPlane,
-    Cube,
-};
-
-struct MaterialBinding {
-    Assets::AssetHandle albedo_texture {};
-    bool uses_texture = false;
-};
-
-struct MeshPlaceholder {
-    MeshPrimitive primitive = MeshPrimitive::Cube;
-    std::string debug_name;
-};
-
 struct RenderEntity {
     std::string name;
     Transform transform;
-    MeshPlaceholder mesh;
-    Assets::AssetHandle mesh_asset {};
-    MaterialBinding material;
+    Assets::MeshHandle mesh;
+    Assets::MaterialHandle material;
 };
 
 struct DirectionalLight {
@@ -46,18 +30,25 @@ struct DirectionalLight {
 
 class RenderScene {
 public:
+    explicit RenderScene(const Assets::AssetManager* assets = nullptr);
+
+    void set_asset_manager(const Assets::AssetManager* assets);
     RenderEntity& add_entity(RenderEntity entity);
     void set_directional_light(const DirectionalLight& light);
 
+    [[nodiscard]] const Assets::AssetManager* asset_manager() const;
+    [[nodiscard]] const Assets::MeshAsset* mesh_resource(const Assets::MeshHandle& handle) const;
+    [[nodiscard]] const Assets::MaterialAsset* material_resource(const Assets::MaterialHandle& handle) const;
     [[nodiscard]] const std::vector<RenderEntity>& entities() const;
     [[nodiscard]] const DirectionalLight& directional_light() const;
     [[nodiscard]] std::size_t entity_count() const;
 
 private:
+    const Assets::AssetManager* m_assets = nullptr;
     std::vector<RenderEntity> m_entities;
     DirectionalLight m_directional_light;
 };
 
-RenderScene create_basic_renderer_test_scene();
+RenderScene create_basic_renderer_test_scene(Assets::AssetManager& assets);
 
 } // namespace Valley::Renderer

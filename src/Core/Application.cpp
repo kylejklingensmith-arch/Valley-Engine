@@ -1,6 +1,7 @@
 #include "Valley/Core/Application.h"
 
 #include "Valley/Core/Logger.h"
+#include "Valley/Platform/Input.h"
 
 #include <chrono>
 #include <stdexcept>
@@ -15,6 +16,8 @@ Application::Application(ApplicationDesc desc)
     if (!m_window) {
         throw std::runtime_error("Failed to create a platform window backend.");
     }
+
+    m_window->input().actions() = Platform::create_default_debug_action_map();
 }
 
 Application::~Application()
@@ -51,6 +54,26 @@ const EngineClock& Application::clock() const
     return m_clock;
 }
 
+Platform::InputSystem& Application::input()
+{
+    return m_window->input();
+}
+
+const Platform::InputSystem& Application::input() const
+{
+    return m_window->input();
+}
+
+ToolsDebug::DebugControls& Application::debug_controls()
+{
+    return m_debug_controls;
+}
+
+const ToolsDebug::DebugControls& Application::debug_controls() const
+{
+    return m_debug_controls;
+}
+
 int Application::run()
 {
     Log::info("Core", "Starting Valley Engine.");
@@ -71,6 +94,8 @@ int Application::run()
         previous_time = now;
 
         m_window->poll_events();
+
+        m_debug_controls.apply(m_window->input(), m_clock, { .real_delta_seconds = real_delta.count() });
 
         const TimeStep frame_step = m_clock.advance(real_delta.count());
 

@@ -4,6 +4,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/keysym.h>
 
 #include <memory>
 #include <stdexcept>
@@ -11,6 +12,46 @@
 
 namespace Valley::Platform {
 namespace {
+KeyCode keycode_from_keysym(KeySym symbol)
+{
+    switch (symbol) {
+    case XK_space: return KeyCode::Space;
+    case XK_Return: return KeyCode::Enter;
+    case XK_Escape: return KeyCode::Escape;
+    case XK_Tab: return KeyCode::Tab;
+    case XK_grave: return KeyCode::Backquote;
+    case XK_w: case XK_W: return KeyCode::W;
+    case XK_a: case XK_A: return KeyCode::A;
+    case XK_s: case XK_S: return KeyCode::S;
+    case XK_d: case XK_D: return KeyCode::D;
+    case XK_q: case XK_Q: return KeyCode::Q;
+    case XK_e: case XK_E: return KeyCode::E;
+    case XK_p: case XK_P: return KeyCode::P;
+    case XK_f: case XK_F: return KeyCode::F;
+    case XK_Left: return KeyCode::Left;
+    case XK_Right: return KeyCode::Right;
+    case XK_Up: return KeyCode::Up;
+    case XK_Down: return KeyCode::Down;
+    case XK_Shift_L: return KeyCode::LeftShift;
+    case XK_Shift_R: return KeyCode::RightShift;
+    case XK_equal: case XK_plus: return KeyCode::Equal;
+    case XK_minus: case XK_underscore: return KeyCode::Minus;
+    case XK_period: case XK_greater: return KeyCode::Period;
+    case XK_comma: case XK_less: return KeyCode::Comma;
+    default: return KeyCode::Unknown;
+    }
+}
+
+MouseButton mouse_button_from_x_button(unsigned int button)
+{
+    switch (button) {
+    case Button1: return MouseButton::Left;
+    case Button2: return MouseButton::Middle;
+    case Button3: return MouseButton::Right;
+    default: return MouseButton::Count;
+    }
+}
+
 class X11Window final : public Window {
 public:
     explicit X11Window(WindowDesc desc)
@@ -37,7 +78,7 @@ public:
             background);
 
         XStoreName(m_display, m_window, m_desc.title.c_str());
-        XSelectInput(m_display, m_window, ExposureMask | KeyPressMask | StructureNotifyMask);
+        XSelectInput(m_display, m_window, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | StructureNotifyMask);
 
         m_delete_message = XInternAtom(m_display, "WM_DELETE_WINDOW", False);
         XSetWMProtocols(m_display, m_window, &m_delete_message, 1);
@@ -61,6 +102,8 @@ public:
 
     void poll_events() override
     {
+        m_input.begin_frame();
+
         while (XPending(m_display) > 0) {
             XEvent event;
             XNextEvent(m_display, &event);
@@ -71,6 +114,23 @@ public:
 
             if (event.type == DestroyNotify) {
                 request_close();
+            }
+
+            if (event.type == KeyPress || event.type == KeyRelease) {
+                const KeySym symbol = XLookupKeysym(&event.xkey, 0);
+                m_input.set_key_down(keycode_from_keysym(symbol), event.type == KeyPress);
+            }
+
+            if (event.type == ButtonPress || event.type == ButtonRelease) {
+                const MouseButton button = mouse_button_from_x_button(event.xbutton.button);
+                if (button != MouseButton::Count) {
+                    m_input.set_mouse_button_down(button, event.type == ButtonPress);
+                }
+                m_input.set_mouse_position(static_cast<double>(event.xbutton.x), static_cast<double>(event.xbutton.y));
+            }
+
+            if (event.type == MotionNotify) {
+                m_input.set_mouse_position(static_cast<double>(event.xmotion.x), static_cast<double>(event.xmotion.y));
             }
         }
     }
@@ -83,6 +143,16 @@ public:
     void request_close() override
     {
         m_should_close = true;
+    }
+
+    [[nodiscard]] InputSystem& input() override
+    {
+        return m_input;
+    }
+
+    [[nodiscard]] const InputSystem& input() const override
+    {
+        return m_input;
     }
 
     [[nodiscard]] bool is_headless() const override
@@ -100,6 +170,7 @@ private:
     Display* m_display = nullptr;
     ::Window m_window = 0;
     Atom m_delete_message = 0;
+    InputSystem m_input;
     bool m_should_close = false;
 };
 } // namespace

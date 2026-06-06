@@ -25,8 +25,8 @@ std::unique_ptr<IRendererBackend> create_backend(const RendererModuleDesc& desc)
 }
 } // namespace
 
-RendererModule::RendererModule(RendererModuleDesc desc)
-    : m_desc(std::move(desc)), m_scene(create_basic_renderer_test_scene()), m_graph(create_default_render_graph())
+RendererModule::RendererModule(RendererModuleDesc desc, const Platform::InputSystem* input, const ToolsDebug::DebugControls* debug_controls)
+    : m_desc(std::move(desc)), m_input(input), m_debug_controls(debug_controls), m_scene(create_basic_renderer_test_scene(m_asset_manager)), m_graph(create_default_render_graph())
 {
     m_camera.set_perspective(60.0, 0.1, 2000.0);
     m_camera.look_at({ 0.0, 4.0, 7.0 }, { 0.0, 0.6, 0.0 });
@@ -43,21 +43,23 @@ void RendererModule::build_imported_test_scene()
     const auto terrain_handle = terrain_future.get();
     const auto prop_handle = prop_future.get();
     const auto texture_handle = texture_future.get();
+    const auto textured_material = m_asset_manager.register_material("engine/materials/imported_debug.material", { .debug_name = "Imported Debug Material", .albedo_texture = texture_handle, .uses_texture = true });
 
     (void)m_asset_manager.acquire_mesh(terrain_handle);
     (void)m_asset_manager.acquire_mesh(prop_handle);
+    (void)m_asset_manager.acquire_material(textured_material);
     (void)m_asset_manager.acquire_texture(texture_handle);
 
-    m_scene.add_entity({ .name = "Imported_TerrainChunk", .transform = { .position = { 0.0, -0.2, 0.0 }, .rotation = { 0.0, 0.0, 0.0 }, .scale = { 8.0, 1.0, 8.0 } }, .mesh = { .primitive = MeshPrimitive::GroundPlane, .debug_name = "ImportedTerrainChunk" }, .mesh_asset = terrain_handle, .material = { .albedo_texture = texture_handle, .uses_texture = true } });
+    m_scene.add_entity({ .name = "Imported_TerrainChunk", .transform = { .position = { 0.0, -0.2, 0.0 }, .rotation = { 0.0, 0.0, 0.0 }, .scale = { 8.0, 1.0, 8.0 } }, .mesh = terrain_handle, .material = textured_material });
 
-    m_scene.add_entity({ .name = "Imported_StaticProp", .transform = { .position = { 1.2, 0.8, 0.4 }, .rotation = { 0.0, 0.4, 0.0 }, .scale = { 1.2, 1.2, 1.2 } }, .mesh = { .primitive = MeshPrimitive::Cube, .debug_name = "ImportedStaticProp" }, .mesh_asset = prop_handle, .material = { .albedo_texture = texture_handle, .uses_texture = true } });
+    m_scene.add_entity({ .name = "Imported_StaticProp", .transform = { .position = { 1.2, 0.8, 0.4 }, .rotation = { 0.0, 0.4, 0.0 }, .scale = { 1.2, 1.2, 1.2 } }, .mesh = prop_handle, .material = textured_material });
 
     (void)m_asset_manager.hot_reload(texture_handle);
 
     for (int i = 0; i < 48; ++i) {
         const double x = static_cast<double>((i % 12) - 6) * 1.5;
         const double z = static_cast<double>(i / 12) * 1.5 - 2.0;
-        m_scene.add_entity({ .name = "Stress_Prop_" + std::to_string(i), .transform = { .position = { x, 0.6, z }, .rotation = { 0.0, 0.0, 0.0 }, .scale = { 0.7, 0.7, 0.7 } }, .mesh = { .primitive = MeshPrimitive::Cube, .debug_name = "StressProp" }, .mesh_asset = prop_handle, .material = { .albedo_texture = texture_handle, .uses_texture = true } });
+        m_scene.add_entity({ .name = "Stress_Prop_" + std::to_string(i), .transform = { .position = { x, 0.6, z }, .rotation = { 0.0, 0.0, 0.0 }, .scale = { 0.7, 0.7, 0.7 } }, .mesh = prop_handle, .material = textured_material });
     }
 }
 
@@ -79,9 +81,14 @@ void RendererModule::on_update(const Core::TimeStep& step)
     }
 
     const auto frame_start = std::chrono::steady_clock::now();
-    m_camera.orbit_origin(step.elapsed_seconds, 7.0, 4.0);
+    if (m_input && m_debug_controls && m_debug_controls->state().free_camera_active) {
+        m_debug_controls->move_free_camera(*m_input, m_camera, step);
+    } else {
+        m_camera.orbit_origin(step.elapsed_seconds, 7.0, 4.0);
+    }
     const double fps = step.real_delta_seconds > 0.0 ? 1.0 / step.real_delta_seconds : 0.0;
-    RenderFrame frame { .scene = &m_scene, .camera = &m_camera, .graph = &m_graph, .debug_overlay = { .fps = fps, .frame_time_ms = step.real_delta_seconds * 1000.0, .frame_index = step.frame_index, .entity_count = m_scene.entity_count(), .draw_calls = m_scene.entity_count(), .bbox_count = m_scene.entity_count(), .chunk_border_count = 9, .lod_transition_count = 4 } };
+    const bool overlays_enabled = !m_debug_controls || m_debug_controls->debug_overlays_enabled();
+    RenderFrame frame { .scene = &m_scene, .camera = &m_camera, .graph = &m_graph, .debug_overlay = { .fps = fps, .frame_time_ms = step.real_delta_seconds * 1000.0, .frame_index = step.frame_index, .entity_count = m_scene.entity_count(), .draw_calls = m_scene.entity_count(), .bbox_count = overlays_enabled ? m_scene.entity_count() : 0, .chunk_border_count = overlays_enabled ? 9U : 0U, .lod_transition_count = overlays_enabled ? 4U : 0U } };
     const auto cpu_begin = std::chrono::steady_clock::now();
     m_backend->begin_frame(frame);
     for (const auto& pass : m_graph.passes()) {

@@ -31,7 +31,7 @@ private:
     void clear(const ColorRgb& color);
     void render_scene(const RenderFrame& frame);
     void render_overlay(const RenderFrame& frame);
-    void draw_entity(const RenderEntity& entity, const Camera& camera);
+    void draw_entity(const RenderEntity& entity, const Camera& camera, const RenderScene& scene);
     void draw_rect(int min_x, int min_y, int max_x, int max_y, const ColorRgb& color);
     void draw_line(int x0, int y0, int x1, int y1, const ColorRgb& color);
     void draw_text_blocks(int x, int y, std::string_view text, const ColorRgb& color);

@@ -108,7 +108,7 @@ void SoftwareRasterBackend::render_scene(const RenderFrame& frame)
     draw_rect(0, m_height / 2, m_width - 1, m_height - 1, horizon);
 
     for (const auto& entity : frame.scene->entities()) {
-        draw_entity(entity, *frame.camera);
+        draw_entity(entity, *frame.camera, *frame.scene);
     }
 
     for (int i = 1; i < 4; ++i) {
@@ -145,13 +145,16 @@ void SoftwareRasterBackend::render_overlay(const RenderFrame& frame)
     draw_text_blocks(14, 70, fifth_line.str(), { 180, 200, 255 });
 }
 
-void SoftwareRasterBackend::draw_entity(const RenderEntity& entity, const Camera& camera)
+void SoftwareRasterBackend::draw_entity(const RenderEntity& entity, const Camera& camera, const RenderScene& scene)
 {
     const double pixels_per_meter = 24.0;
     const int center_x = static_cast<int>(m_width * 0.5 + (entity.transform.position.x - camera.position().x * 0.15) * pixels_per_meter);
     const int center_y = static_cast<int>(m_height * 0.62 - (entity.transform.position.z - camera.position().z * 0.15) * pixels_per_meter - entity.transform.position.y * 18.0);
 
-    if (entity.mesh.primitive == MeshPrimitive::GroundPlane) {
+    const auto* mesh = scene.mesh_resource(entity.mesh);
+    const auto primitive = mesh ? mesh->primitive_hint : Assets::MeshPrimitiveHint::Cube;
+
+    if (primitive == Assets::MeshPrimitiveHint::GroundPlane) {
         const int half_width = static_cast<int>(entity.transform.scale.x * pixels_per_meter * 0.5);
         const int half_depth = static_cast<int>(entity.transform.scale.z * pixels_per_meter * 0.25);
         draw_rect(center_x - half_width, center_y - half_depth, center_x + half_width, center_y + half_depth, { 44, 82, 48 });

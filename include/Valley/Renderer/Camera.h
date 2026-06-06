@@ -9,6 +9,7 @@ class Camera {
 public:
     void set_perspective(double vertical_fov_degrees, double near_clip, double far_clip);
     void look_at(const Vec3& position, const Vec3& target);
+    void move_to(const Vec3& position);
     void orbit_origin(double elapsed_seconds, double radius, double height);
 
     [[nodiscard]] const Vec3& position() const;

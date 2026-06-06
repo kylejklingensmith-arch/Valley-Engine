@@ -17,7 +17,10 @@ public:
         Core::Log::info("Platform", "Using headless window backend.");
     }
 
-    void poll_events() override {}
+    void poll_events() override
+    {
+        m_input.begin_frame();
+    }
 
     [[nodiscard]] bool should_close() const override
     {
@@ -27,6 +30,16 @@ public:
     void request_close() override
     {
         m_should_close = true;
+    }
+
+    [[nodiscard]] InputSystem& input() override
+    {
+        return m_input;
+    }
+
+    [[nodiscard]] const InputSystem& input() const override
+    {
+        return m_input;
     }
 
     [[nodiscard]] bool is_headless() const override
@@ -41,6 +54,7 @@ public:
 
 private:
     WindowDesc m_desc;
+    InputSystem m_input;
     bool m_should_close = false;
 };
 

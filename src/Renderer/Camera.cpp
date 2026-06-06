@@ -22,6 +22,11 @@ void Camera::look_at(const Vec3& position, const Vec3& target)
     m_forward = normalized(target - position);
 }
 
+void Camera::move_to(const Vec3& position)
+{
+    m_position = position;
+}
+
 void Camera::orbit_origin(double elapsed_seconds, double radius, double height)
 {
     const double angle = elapsed_seconds * 0.35;

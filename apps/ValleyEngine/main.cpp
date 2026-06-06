@@ -125,7 +125,7 @@ int main(int argc, char** argv)
         Valley::Core::Application app(desc);
         app.add_module(std::make_unique<Valley::World::WorldModule>());
         app.add_module(std::make_unique<Valley::Simulation::SimulationModule>());
-        app.add_module(std::make_unique<Valley::Renderer::RendererModule>(renderer_desc));
+        app.add_module(std::make_unique<Valley::Renderer::RendererModule>(renderer_desc, &app.input(), &app.debug_controls()));
         app.add_module(std::make_unique<Valley::ToolsDebug::DebugModule>());
         return app.run();
     } catch (const std::exception& exception) {
