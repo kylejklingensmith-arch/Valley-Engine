@@ -1,0 +1,2 @@
+VALLEY_PNG_FIXTURE width=1 height=1 channels=4
+# Text-only test fixture used to exercise PNG import plumbing without storing binary files in review diffs.

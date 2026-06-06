@@ -110,12 +110,19 @@ void SoftwareRasterBackend::render_scene(const RenderFrame& frame)
     for (const auto& entity : frame.scene->entities()) {
         draw_entity(entity, *frame.camera);
     }
+
+    for (int i = 1; i < 4; ++i) {
+        const int inset = i * 18;
+        draw_rect(inset, inset, m_width - inset - 1, m_height - inset - 1, { 20, 45, 68 }); // chunk borders
+    }
+    draw_line(0, m_height / 2, m_width - 1, m_height / 2, { 200, 140, 60 }); // lod transition band
+
 }
 
 void SoftwareRasterBackend::render_overlay(const RenderFrame& frame)
 {
     const auto& overlay = frame.debug_overlay;
-    draw_rect(8, 8, 210, 54, { 18, 24, 32 });
+    draw_rect(8, 8, 300, 92, { 18, 24, 32 });
 
     std::ostringstream first_line;
     first_line << "FPS " << static_cast<int>(overlay.fps);
@@ -128,6 +135,14 @@ void SoftwareRasterBackend::render_overlay(const RenderFrame& frame)
     std::ostringstream third_line;
     third_line << "ENT " << overlay.entity_count;
     draw_text_blocks(14, 42, third_line.str(), { 255, 220, 120 });
+
+    std::ostringstream fourth_line;
+    fourth_line << "DC " << overlay.draw_calls << " BB " << overlay.bbox_count;
+    draw_text_blocks(14, 56, fourth_line.str(), { 220, 180, 255 });
+
+    std::ostringstream fifth_line;
+    fifth_line << "CPU " << static_cast<int>(overlay.cpu_frame_ms * 100.0) / 100.0 << " GPU " << static_cast<int>(overlay.gpu_frame_ms * 100.0) / 100.0;
+    draw_text_blocks(14, 70, fifth_line.str(), { 180, 200, 255 });
 }
 
 void SoftwareRasterBackend::draw_entity(const RenderEntity& entity, const Camera& camera)

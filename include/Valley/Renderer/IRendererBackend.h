@@ -20,6 +20,12 @@ struct DebugOverlayData {
     double frame_time_ms = 0.0;
     unsigned long long frame_index = 0;
     std::size_t entity_count = 0;
+    std::size_t draw_calls = 0;
+    std::size_t bbox_count = 0;
+    std::size_t chunk_border_count = 0;
+    std::size_t lod_transition_count = 0;
+    double cpu_frame_ms = 0.0;
+    double gpu_frame_ms = 0.0;
 };
 
 struct RenderFrame {
