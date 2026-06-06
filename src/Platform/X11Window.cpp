@@ -28,6 +28,7 @@ KeyCode keycode_from_keysym(KeySym symbol)
     case XK_e: case XK_E: return KeyCode::E;
     case XK_p: case XK_P: return KeyCode::P;
     case XK_f: case XK_F: return KeyCode::F;
+    case XK_0: case XK_parenright: return KeyCode::Digit0;
     case XK_Left: return KeyCode::Left;
     case XK_Right: return KeyCode::Right;
     case XK_Up: return KeyCode::Up;

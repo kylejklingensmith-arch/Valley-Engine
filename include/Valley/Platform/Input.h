@@ -23,6 +23,7 @@ enum class KeyCode {
     E,
     P,
     F,
+    Digit0,
     Left,
     Right,
     Up,

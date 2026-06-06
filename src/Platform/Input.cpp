@@ -158,6 +158,7 @@ ActionMap create_default_debug_action_map()
     actions.bind_key("debug.step_fixed_tick", KeyCode::Period);
     actions.bind_key("debug.time_scale_up", KeyCode::Equal);
     actions.bind_key("debug.time_scale_down", KeyCode::Minus);
+    actions.bind_key("debug.time_scale_reset", KeyCode::Digit0);
     actions.bind_key("debug.overlays_toggle", KeyCode::Backquote);
     actions.bind_key("debug.camera.forward", KeyCode::W);
     actions.bind_key("debug.camera.backward", KeyCode::S);

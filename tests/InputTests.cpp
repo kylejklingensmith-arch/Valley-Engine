@@ -92,9 +92,33 @@ void debug_actions_drive_engine_clock_and_overlay_state()
     assert(clock.time_scale() == 1.5);
 
     input.begin_frame();
+    input.set_key_down(Platform::KeyCode::Digit0, true);
+    controls.apply(input, clock, {});
+    assert(clock.time_scale() == 1.0);
+
+    input.begin_frame();
     input.set_key_down(Platform::KeyCode::Backquote, true);
     controls.apply(input, clock, {});
     assert(!controls.debug_overlays_enabled());
+}
+
+void free_camera_debug_actions_move_camera_without_gameplay_controller()
+{
+    Platform::InputSystem input;
+    input.actions() = Platform::create_default_debug_action_map();
+    ToolsDebug::DebugControls controls({ .free_camera_speed = 2.0 });
+    Renderer::Camera camera;
+    camera.look_at({ 0.0, 0.0, 0.0 }, { 0.0, 0.0, -1.0 });
+
+    Core::EngineClock clock;
+    input.set_key_down(Platform::KeyCode::W, true);
+    controls.apply(input, clock, { .real_delta_seconds = 0.5 });
+    controls.move_free_camera(input, camera, { .real_delta_seconds = 0.5 });
+
+    assert(camera.position().x == 0.0);
+    assert(camera.position().y == 0.0);
+    assert(camera.position().z == -1.0);
+    assert(controls.state().free_camera_active);
 }
 
 } // namespace
@@ -105,6 +129,7 @@ int main()
     mouse_state_tracks_buttons_and_position();
     action_map_combines_key_and_mouse_bindings();
     debug_actions_drive_engine_clock_and_overlay_state();
+    free_camera_debug_actions_move_camera_without_gameplay_controller();
     std::cout << "Input tests passed.\n";
     return 0;
 }
