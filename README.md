@@ -60,7 +60,25 @@ Application
         -> RendererModule/Camera: overlay toggle and free-camera movement
 ```
 
-Default engine debug bindings are deliberately content-agnostic: `P` toggles pause, `.` queues one fixed debug tick, `=`/`-` adjust time scale, backquote toggles debug overlays, and `W/A/S/D/Q/E` move the free camera with Shift for faster movement. These controls do not create gameplay concepts and can be rebound by replacing the action map before running the application.
+Default engine debug bindings are deliberately content-agnostic: `P` toggles pause, `.` queues one fixed debug tick, `=`/`-` adjust time scale, `0` resets time scale to real time, backquote toggles debug overlays, and `W/A/S/D/Q/E` move the free camera with Shift for faster movement. These controls do not create gameplay concepts and can be rebound by replacing the action map before running the application.
+
+## Interactive debug controls
+
+When running with a native window backend, the default engine-level debug action map provides these controls:
+
+| Control | Action | State used |
+| --- | --- | --- |
+| `P` | Pause/resume simulation time. | Pressed |
+| `.` | Queue one fixed simulation debug step. | Pressed |
+| `=` / `-` | Increase or decrease simulation time scale. | Pressed |
+| `0` | Reset simulation time scale to `1.0`. | Pressed |
+| `` ` `` | Toggle debug overlays. | Pressed |
+| `W` / `S` | Move the free camera forward/backward. | Held |
+| `A` / `D` | Move the free camera left/right. | Held |
+| `E` / `Q` | Move the free camera up/down. | Held |
+| Left or right `Shift` | Increase free-camera movement speed. | Held |
+
+Headless mode still owns an `InputSystem`, but its window backend only begins empty input frames, so these controls are inactive unless tests or tools inject input events directly.
 
 ## Simulation architecture
 

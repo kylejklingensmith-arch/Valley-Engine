@@ -11,6 +11,7 @@ struct DebugControlDesc {
     double free_camera_speed = 6.0;
     double fast_camera_multiplier = 4.0;
     double time_scale_step = 0.25;
+    double default_time_scale = 1.0;
     double min_time_scale = 0.0;
     double max_time_scale = 8.0;
 };

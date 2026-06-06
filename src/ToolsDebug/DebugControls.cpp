@@ -33,6 +33,10 @@ void DebugControls::apply(const Platform::InputSystem& input, Core::EngineClock&
         clock.set_time_scale(std::max(m_desc.min_time_scale, clock.time_scale() - m_desc.time_scale_step));
     }
 
+    if (input.action_pressed("debug.time_scale_reset")) {
+        clock.set_time_scale(std::clamp(m_desc.default_time_scale, m_desc.min_time_scale, m_desc.max_time_scale));
+    }
+
     if (input.action_pressed("debug.overlays_toggle")) {
         m_state.debug_overlays_enabled = !m_state.debug_overlays_enabled;
     }
