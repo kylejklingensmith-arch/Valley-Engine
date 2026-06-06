@@ -13,6 +13,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(ValleyEngineCore
+    src/Assets/AssetManager.cpp
+    src/Assets/AssetRegistry.cpp
+    src/Assets/AssetTypes.cpp
     src/Core/Application.cpp
     src/Core/EngineClock.cpp
     src/Core/Logger.cpp
@@ -24,6 +27,7 @@ add_library(ValleyEngineCore
     src/Terrain/TerrainStreamer.cpp
     src/Terrain/TerrainTypes.cpp
     src/Renderer/Camera.cpp
+    src/Renderer/RenderDiagnostics.cpp
     src/Renderer/RenderGraph.cpp
     src/Renderer/RendererModule.cpp
     src/Renderer/Scene.cpp
@@ -48,6 +52,8 @@ target_include_directories(ValleyEngineCore
         $<INSTALL_INTERFACE:include>)
 
 target_compile_features(ValleyEngineCore PUBLIC cxx_std_20)
+
+target_compile_definitions(ValleyEngineCore PUBLIC VALLEY_SOURCE_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
 
 target_compile_options(ValleyEngineCore PRIVATE
     $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>)
@@ -80,6 +86,9 @@ if(VALLEY_BUILD_TESTS)
     add_executable(ValleyRendererArchitectureTests tests/RendererArchitectureTests.cpp)
     target_link_libraries(ValleyRendererArchitectureTests PRIVATE Valley::Engine)
 
+    add_executable(ValleyAssetPipelineTests tests/AssetPipelineTests.cpp)
+    target_link_libraries(ValleyAssetPipelineTests PRIVATE Valley::Engine)
+
     add_executable(ValleyWorldStreamingTests tests/WorldStreamingTests.cpp)
     target_link_libraries(ValleyWorldStreamingTests PRIVATE Valley::Engine)
 
@@ -92,6 +101,7 @@ if(VALLEY_BUILD_TESTS)
     add_test(NAME valley_engine_smoke COMMAND ValleyEngine --headless --frames 3)
     add_test(NAME valley_engine_clock_tests COMMAND ValleyEngineClockTests)
     add_test(NAME valley_renderer_architecture_tests COMMAND ValleyRendererArchitectureTests)
+    add_test(NAME valley_asset_pipeline_tests COMMAND ValleyAssetPipelineTests)
     add_test(NAME valley_world_streaming_tests COMMAND ValleyWorldStreamingTests)
     add_test(NAME valley_terrain_framework_tests COMMAND ValleyTerrainFrameworkTests)
     add_test(NAME valley_simulation_framework_tests COMMAND ValleySimulationFrameworkTests)

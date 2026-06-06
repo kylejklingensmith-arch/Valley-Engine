@@ -51,6 +51,7 @@ RenderScene create_basic_renderer_test_scene()
             .primitive = MeshPrimitive::GroundPlane,
             .debug_name = "Engine Ground Plane Placeholder",
         },
+        .material = {},
     });
 
     scene.add_entity({
@@ -64,6 +65,7 @@ RenderScene create_basic_renderer_test_scene()
             .primitive = MeshPrimitive::Cube,
             .debug_name = "Engine Cube Placeholder",
         },
+        .material = {},
     });
 
     return scene;

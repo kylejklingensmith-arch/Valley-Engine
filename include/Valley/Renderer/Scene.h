@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Valley/Assets/AssetTypes.h"
 #include "Valley/Renderer/Math.h"
 
 #include <cstddef>
@@ -19,6 +20,11 @@ enum class MeshPrimitive {
     Cube,
 };
 
+struct MaterialBinding {
+    Assets::AssetHandle albedo_texture {};
+    bool uses_texture = false;
+};
+
 struct MeshPlaceholder {
     MeshPrimitive primitive = MeshPrimitive::Cube;
     std::string debug_name;
@@ -28,6 +34,8 @@ struct RenderEntity {
     std::string name;
     Transform transform;
     MeshPlaceholder mesh;
+    Assets::AssetHandle mesh_asset {};
+    MaterialBinding material;
 };
 
 struct DirectionalLight {

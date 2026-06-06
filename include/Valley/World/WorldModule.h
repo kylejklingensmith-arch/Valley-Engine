@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Valley/Core/Module.h"
+#include "Valley/Renderer/RenderDiagnostics.h"
 #include "Valley/Terrain/TerrainStreamer.h"
 #include "Valley/World/FloatingOrigin.h"
 #include "Valley/World/WorldStreamer.h"
@@ -25,6 +26,8 @@ private:
     WorldVec3 m_observer_position;
     std::size_t m_last_debug_loaded_count = 0;
     std::size_t m_last_terrain_mesh_count = 0;
+    Renderer::TimingProfiler m_chunk_timing;
+    Renderer::TimingProfiler m_terrain_timing;
 };
 
 } // namespace Valley::World
