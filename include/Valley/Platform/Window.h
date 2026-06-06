@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Valley/Platform/Input.h"
+
 #include <memory>
 #include <string>
 
@@ -19,6 +21,8 @@ public:
     virtual void poll_events() = 0;
     [[nodiscard]] virtual bool should_close() const = 0;
     virtual void request_close() = 0;
+    [[nodiscard]] virtual InputSystem& input() = 0;
+    [[nodiscard]] virtual const InputSystem& input() const = 0;
     [[nodiscard]] virtual bool is_headless() const = 0;
     [[nodiscard]] virtual const WindowDesc& desc() const = 0;
 };

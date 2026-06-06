@@ -19,6 +19,7 @@ add_library(ValleyEngineCore
     src/Core/Application.cpp
     src/Core/EngineClock.cpp
     src/Core/Logger.cpp
+    src/Platform/Input.cpp
     src/Platform/Window.cpp
     src/Terrain/AsyncTerrainMesher.cpp
     src/Terrain/Biome.cpp
@@ -42,6 +43,7 @@ add_library(ValleyEngineCore
     src/Simulation/SimulationModule.cpp
     src/Simulation/SimulationProfiler.cpp
     src/Simulation/SimulationScheduler.cpp
+    src/ToolsDebug/DebugControls.cpp
     src/ToolsDebug/DebugModule.cpp)
 
 add_library(Valley::Engine ALIAS ValleyEngineCore)
@@ -98,6 +100,9 @@ if(VALLEY_BUILD_TESTS)
     add_executable(ValleySimulationFrameworkTests tests/SimulationFrameworkTests.cpp)
     target_link_libraries(ValleySimulationFrameworkTests PRIVATE Valley::Engine)
 
+    add_executable(ValleyInputTests tests/InputTests.cpp)
+    target_link_libraries(ValleyInputTests PRIVATE Valley::Engine)
+
     add_test(NAME valley_engine_smoke COMMAND ValleyEngine --headless --frames 3)
     add_test(NAME valley_engine_clock_tests COMMAND ValleyEngineClockTests)
     add_test(NAME valley_renderer_architecture_tests COMMAND ValleyRendererArchitectureTests)
@@ -105,4 +110,5 @@ if(VALLEY_BUILD_TESTS)
     add_test(NAME valley_world_streaming_tests COMMAND ValleyWorldStreamingTests)
     add_test(NAME valley_terrain_framework_tests COMMAND ValleyTerrainFrameworkTests)
     add_test(NAME valley_simulation_framework_tests COMMAND ValleySimulationFrameworkTests)
+    add_test(NAME valley_input_tests COMMAND ValleyInputTests)
 endif()

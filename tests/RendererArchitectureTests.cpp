@@ -16,13 +16,19 @@ void require(bool condition, std::string_view message)
     }
 }
 
-void test_scene_contains_engine_level_render_primitives()
+void test_scene_submits_mesh_and_material_handles()
 {
-    const auto scene = Valley::Renderer::create_basic_renderer_test_scene();
+    Valley::Assets::AssetManager assets;
+    const auto scene = Valley::Renderer::create_basic_renderer_test_scene(assets);
 
     require(scene.entity_count() == 2, "test scene has ground and cube entities");
-    require(scene.entities()[0].mesh.primitive == Valley::Renderer::MeshPrimitive::GroundPlane, "first entity is a ground plane placeholder");
-    require(scene.entities()[1].mesh.primitive == Valley::Renderer::MeshPrimitive::Cube, "second entity is a cube placeholder");
+    require(scene.entities()[0].mesh.valid(), "first entity submits a mesh handle");
+    require(scene.entities()[1].mesh.valid(), "second entity submits a mesh handle");
+    require(scene.entities()[0].material.valid(), "first entity submits a material handle");
+    require(scene.entities()[1].material.valid(), "second entity submits a material handle");
+    require(scene.mesh_resource(scene.entities()[0].mesh)->primitive_hint == Valley::Assets::MeshPrimitiveHint::GroundPlane, "first entity resolves to ground mesh resource");
+    require(scene.mesh_resource(scene.entities()[1].mesh)->primitive_hint == Valley::Assets::MeshPrimitiveHint::Cube, "second entity resolves to cube mesh resource");
+    require(scene.material_resource(scene.entities()[0].material) != nullptr, "material handle resolves through scene asset manager");
     require(scene.directional_light().intensity > 0.0, "directional light is configured");
 }
 
@@ -37,9 +43,10 @@ void default_render_graph_has_expected_pass_order()
     require(graph.contains("SceneGeometry"), "graph can look up a named pass");
 }
 
-void software_backend_renders_overlay_stats()
+void software_backend_renders_scene_submitted_through_handles()
 {
-    const auto scene = Valley::Renderer::create_basic_renderer_test_scene();
+    Valley::Assets::AssetManager assets;
+    const auto scene = Valley::Renderer::create_basic_renderer_test_scene(assets);
     const auto graph = Valley::Renderer::create_default_render_graph();
     Valley::Renderer::Camera camera;
     camera.look_at({ 0.0, 4.0, 7.0 }, { 0.0, 0.5, 0.0 });
@@ -73,9 +80,9 @@ void software_backend_renders_overlay_stats()
 int main()
 {
     try {
-        test_scene_contains_engine_level_render_primitives();
+        test_scene_submits_mesh_and_material_handles();
         default_render_graph_has_expected_pass_order();
-        software_backend_renders_overlay_stats();
+        software_backend_renders_scene_submitted_through_handles();
     } catch (const std::exception& exception) {
         std::cerr << "RendererArchitectureTests failed: " << exception.what() << '\n';
         return 1;
